@@ -10,60 +10,71 @@ Live Preview: View filtered results instantly with line numbers.
 
 Sub-directory Deployment: configured to run under /log_filter.
 
-🛠️ Installation Guide
+# Installation Guide
 This guide is designed for Ubuntu / Debian systems (or WSL).
 
-Step 1: Install System Dependencies
+## Step 1: Install System Dependencies
 On a fresh machine, install Apache, the Python WSGI module, and Git.
 
-Bash
-
+```
 sudo apt update
 sudo apt install apache2 libapache2-mod-wsgi-py3 python3-venv git -y
-Step 2: Clone the Repository
+```
+
+## Step 2: Clone the Repository
 It is recommended to clone the project directly into /var/www/.
 
-Bash
-
+```
 cd /var/www
-# Replace the URL below with your actual GitHub repository URL
+```
+
+Replace the URL below with your actual GitHub repository URL
+
+```
 sudo git clone [https://github.com/guanweichiang/log_filter_remake.git](https://github.com/guanweichiang/log_filter_remake.git) log_filter
-Step 3: Setup Python Virtual Environment
+```
+
+## Step 3: Setup Python Virtual Environment
 We need to install the required Python packages. (Note: We temporarily change permissions to the current user to run pip without issues.)
 
-Bash
-
-# 1. Temporarily take ownership of the directory
+### 1. Temporarily take ownership of the directory
+```
 sudo chown -R $USER:$USER /var/www/log_filter
-
-# 2. Enter the directory
+```
+### 2. Enter the directory
+```
 cd /var/www/log_filter
-
-# 3. Create the virtual environment
+```
+### 3. Create the virtual environment
+```
 python3 -m venv venv
-
-# 4. Activate venv and install dependencies
+```
+### 4. Activate venv and install dependencies
+```
 source venv/bin/activate
 pip install -r requirements.txt
 deactivate
-Step 4: Configure app.wsgi (⚠️ Important)
+```
+
+## Step 4: Configure app.wsgi (⚠️ Important)
 Apache uses this file to launch your Python application. You must verify your Python version.
 
 Check the Python version inside your virtual environment:
 
-Bash
-
+```
 ls /var/www/log_filter/venv/lib/
 # You will see a folder name like 'python3.10' or 'python3.12'
+```
+
 Edit the app.wsgi file:
 
-Bash
-
+```
 nano app.wsgi
+```
+
 Ensure the path matches your Python version (Update python3.x accordingly):
 
-Python
-
+```
 import sys
 import site
 
@@ -73,18 +84,20 @@ site.addsitedir('/var/www/log_filter/venv/lib/python3.12/site-packages')
 sys.path.insert(0, '/var/www/log_filter')
 
 from myapp import app as application
-Step 5: Configure Apache VirtualHost
+```
+
+## Step 5: Configure Apache VirtualHost
 Create a configuration file for the site.
 
 Create the file:
 
-Bash
-
+```
 sudo nano /etc/apache2/sites-available/log_filter.conf
+```
 Paste the following configuration:
 
-Apache
 
+```
 <VirtualHost *:80>
     # Use 'localhost' for local testing, or your domain/IP for production
     ServerName localhost
@@ -110,18 +123,20 @@ Apache
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
+```
+
 Enable the site and reload Apache:
 
-Bash
-
+```
 sudo a2ensite log_filter.conf
 # Optional: Disable the default Apache welcome page
 sudo a2dissite 000-default.conf
-Step 6: Finalize Permissions (🚀 Crucial)
+```
+
+## Step 6: Finalize Permissions (🚀 Crucial)
 For Apache to function correctly and handle file uploads, ownership must be transferred to the www-data user.
 
-Bash
-
+```
 # 1. Create the uploads directory (if it wasn't cloned)
 sudo mkdir -p /var/www/log_filter/uploads
 
@@ -133,16 +148,19 @@ sudo chmod -R 777 /var/www/log_filter/uploads
 
 # 4. Restart Apache to apply changes
 sudo systemctl restart apache2
-🔍 Verification & Troubleshooting
+```
+
+# Verification & Troubleshooting
 Accessing the App
 Open your browser and visit: http://localhost/log_filter (Or http://<YOUR_SERVER_IP>/log_filter)
 
 Common Errors
 1. 500 Internal Server Error This usually indicates a Python version mismatch or missing packages. Check the error log:
 
-Bash
 
+```
 sudo tail -n 20 /var/log/apache2/error.log
+```
 Solution: Check if ModuleNotFoundError appears. If so, fix the path in app.wsgi or run pip install again.
 
 2. 403 Forbidden The server does not have permission to read the files.
