@@ -133,7 +133,7 @@ sudo a2ensite log_filter.conf
 sudo a2dissite 000-default.conf
 ```
 
-## Step 6: Finalize Permissions (Crucial)
+## Step 6: Finalize Permissions
 For Apache to function correctly and handle file uploads, ownership must be transferred to the www-data user.
 
 ```
@@ -148,6 +148,14 @@ sudo chmod -R 777 /var/www/log_filter/uploads
 
 # 4. Restart Apache to apply changes
 sudo systemctl restart apache2
+```
+
+## Step 7: Start/Stop Apache2
+```
+sudo systemctl start apache2
+```
+```
+sudo systemctl stop apache2
 ```
 
 # Verification & Troubleshooting
