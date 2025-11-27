@@ -31,7 +31,7 @@ cd /var/www
 Replace the URL below with your actual GitHub repository URL
 
 ```
-sudo git clone [https://github.com/guanweichiang/log_filter_remake.git](https://github.com/guanweichiang/log_filter_remake.git) log_filter
+sudo git clone https://github.com/guanweichiang/log_filter_remake.git
 ```
 
 ## Step 3: Setup Python Virtual Environment
@@ -56,7 +56,7 @@ pip install -r requirements.txt
 deactivate
 ```
 
-## Step 4: Configure app.wsgi (⚠️ Important)
+## Step 4: Configure app.wsgi (Important)
 Apache uses this file to launch your Python application. You must verify your Python version.
 
 Check the Python version inside your virtual environment:
@@ -133,7 +133,7 @@ sudo a2ensite log_filter.conf
 sudo a2dissite 000-default.conf
 ```
 
-## Step 6: Finalize Permissions (🚀 Crucial)
+## Step 6: Finalize Permissions (Crucial)
 For Apache to function correctly and handle file uploads, ownership must be transferred to the www-data user.
 
 ```
