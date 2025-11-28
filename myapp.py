@@ -54,7 +54,8 @@ def upload_file():
             
             # --- DEBUG 用 ---
             # 在終端機印出檔名與前50個字，確認後端讀到的是不是新的
-            print(f"Uploaded: {file.filename}, Size: {len(content)} chars", file=sys.stderr, flush=True)
+            # 使用 repr() 會把中文字轉成安全編碼顯示 (例如 \u5c0d...)，不會崩潰
+            print(f"Uploaded: {repr(file.filename)}, Size: {len(content)} chars", file=sys.stderr, flush=True)
             print(f"Content Preview: {content[:50]}...", file=sys.stderr, flush=True)
             # ----------------
             
