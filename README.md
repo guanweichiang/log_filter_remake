@@ -142,6 +142,7 @@ sudo mkdir -p /var/www/log_filter/uploads
 
 # 2. Transfer ownership to Apache
 sudo chown -R www-data:www-data /var/www/log_filter
+sudo chown -R www-data:www-data /var/www/log_filter/uploads
 
 # 3. Grant write permissions to the uploads folder
 sudo chmod -R 777 /var/www/log_filter/uploads
@@ -178,3 +179,4 @@ Solution: Re-run the chown and chmod commands in Step 6.
 3. Upload Failed / File Not Found
 
 Solution: Ensure myapp.py uses an absolute path for UPLOAD_FOLDER (e.g., /var/www/log_filter/uploads) instead of /tmp.
+

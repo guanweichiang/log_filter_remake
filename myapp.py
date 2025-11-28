@@ -3,6 +3,7 @@ import os
 import re
 import logging
 import sys
+import time
 
 
 app = Flask(__name__, static_url_path='/log_filter/static')
@@ -27,6 +28,7 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 
+@app.route('/upload', methods=['POST'])
 def upload_file():
     print(">>> upload route triggered", file=sys.stderr, flush=True)
 
@@ -37,11 +39,37 @@ def upload_file():
         return jsonify({"success": False, "message": "No file"})
     
     if file and allowed_file(file.filename):
+        # 建議：為了避免同名檔案權限或鎖定問題，雖然 open('w') 會覆蓋，
+        # 但有些極端情況下(如 Windows)可能有 file lock。
+        # 不過在 Linux (/var/www) 下通常沒問題。
+        
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filepath)
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-            content = f.read()
-        return jsonify({"success": True, "content": content})
+        
+        try:
+            file.save(filepath)
+            
+            # 讀取檔案
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            
+            # --- DEBUG 用 ---
+            # 在終端機印出檔名與前50個字，確認後端讀到的是不是新的
+            print(f"Uploaded: {file.filename}, Size: {len(content)} chars", file=sys.stderr, flush=True)
+            print(f"Content Preview: {content[:50]}...", file=sys.stderr, flush=True)
+            # ----------------
+            
+            response = jsonify({"success": True, "content": content})
+            
+            # --- 關鍵修正：加入 Header 禁止瀏覽器快取此回應 ---
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+
+        except Exception as e:
+            print(f"Error saving/reading file: {e}", file=sys.stderr, flush=True)
+            return jsonify({"success": False, "message": str(e)})
+
     return jsonify({"success": False, "message": "Invalid file"})
 
 @app.route('/filter', methods=['POST'])

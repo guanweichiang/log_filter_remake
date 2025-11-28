@@ -67,31 +67,42 @@
       this.style.borderColor = '#aaa';
     });
 
-    dropZone.addEventListener('drop', function(e) {
+dropZone.addEventListener('drop', function(e) {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
       const formData = new FormData();
       formData.append('file', file);
 
+      // [UX 優化] 上傳開始時，可以顯示 "Loading..." 或清空畫面，讓使用者知道正在處理
+      filteredContent.innerHTML = "<li>Loading new log...</li>";
+
+      // [修正 2] 加入 cache: 'no-store' 確保瀏覽器不快取
       fetch('upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        cache: 'no-store' 
       })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
+          console.log("Upload success, new content length:", data.content.length); // Debug 用
+          
+          // 更新全域變數
           rawText = data.content;
-          //updateRawContent(rawText);
-          // 當有新的檔案時，重設 filter 與 filter 列表
-          //filters = [];
+          
+          // [修正 1] 確保只在上傳成功 "後" 才更新介面
           updateFilterList();
           updateFilteredContent();
         } else {
-          alert(data.message);
+          alert("Upload failed: " + data.message);
         }
+      })
+      .catch(err => {
+          console.error("Upload error:", err);
+          alert("Upload error check console.");
       });
-      updateFilterList();
-      updateFilteredContent(); // 更新顯示結果
+
+      // [修正 1] 移除原本寫在這裡的 updateFilterList() 和 updateFilteredContent()
     });
     
     // 處理 Upload 按鈕點擊事件
@@ -107,7 +118,8 @@
 
       fetch('upload', {
         method: 'POST',
-        body: formData
+        body: formData,
+        cache: 'no-store'
       })
       .then(res => res.json())
       .then(data => {
